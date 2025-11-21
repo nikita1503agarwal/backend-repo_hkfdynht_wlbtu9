@@ -11,8 +11,8 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
 # Example schemas (replace with your own):
 
@@ -37,6 +37,34 @@ class Product(BaseModel):
     price: float = Field(..., ge=0, description="Price in dollars")
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
+
+# Services website schemas
+
+class Inquiry(BaseModel):
+    """
+    General contact inquiries from the website
+    Collection name: "inquiry"
+    """
+    name: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = Field(None, description="Optional phone number")
+    subject: str = Field(..., min_length=3, max_length=150)
+    message: str = Field(..., min_length=10, max_length=2000)
+    service_interest: Optional[str] = Field(None, description="Optional service user is interested in")
+
+class ServiceOrder(BaseModel):
+    """
+    Orders/requests for services
+    Collection name: "serviceorder"
+    """
+    name: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = Field(None)
+    service: str = Field(..., description="Selected service name")
+    budget_range: Optional[str] = Field(None, description="Budget range text, e.g., $1k-$5k")
+    timeline: Optional[str] = Field(None, description="Expected timeline e.g., 2-4 weeks")
+    requirements: str = Field(..., min_length=10, max_length=4000, description="Project details / requirements")
+    addons: Optional[List[str]] = Field(default_factory=list, description="Optional add-ons selected")
 
 # Add your own schemas here:
 # --------------------------------------------------

@@ -1,8 +1,13 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Any, Dict
 
-app = FastAPI()
+from database import create_document
+from schemas import Inquiry, ServiceOrder
+
+app = FastAPI(title="Services Backend", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,6 +68,24 @@ def test_database():
     response["database_name"] = "✅ Set" if os.getenv("DATABASE_NAME") else "❌ Not Set"
     
     return response
+
+# Contact inquiry endpoint
+@app.post("/api/inquiries")
+def submit_inquiry(payload: Inquiry) -> Dict[str, Any]:
+    try:
+        insert_id = create_document("inquiry", payload)
+        return {"ok": True, "id": insert_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Service order endpoint
+@app.post("/api/orders")
+def submit_order(payload: ServiceOrder) -> Dict[str, Any]:
+    try:
+        insert_id = create_document("serviceorder", payload)
+        return {"ok": True, "id": insert_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
